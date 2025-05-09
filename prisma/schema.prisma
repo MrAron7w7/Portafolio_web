@@ -1,0 +1,79 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  //output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  password  String? // solo si usas credentials
+  image     String? // avatar
+  role      String   @default("admin") // por si necesitas roles a futuro
+  bio       String? // resumen personal
+  title     String? // "Fullstack Developer"
+  cvUrl     String? // enlace a CV
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  messages Message[]
+  projects Project[]
+  skills   Skill[]
+}
+
+model Project {
+  id           String   @id @default(cuid())
+  title        String
+  description  String
+  imageUrl     String
+  demoUrl      String?
+  githubUrl    String?
+  technologies String[]
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  authorId String
+  author   User   @relation(fields: [authorId], references: [id])
+}
+
+model Skill {
+  id        String        @id @default(cuid())
+  name      String
+  icon      String // URL o nombre del icono
+  category  SkillCategory
+  createdAt DateTime      @default(now())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+}
+
+enum SkillCategory {
+  FRONTEND
+  BACKEND
+  DEVOPS
+  DATABASE
+  MOBILE
+  OTHERS
+}
+
+model Message {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  content   String
+  createdAt DateTime @default(now())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+}
